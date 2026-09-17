@@ -154,15 +154,31 @@ h2{font-size:15px;font-weight:800;margin-bottom:4px}
     font-weight:700;cursor:pointer;transition:.15s}
 .tb.on{background:#0d2f40;color:#fff;border-color:#0d2f40}
 
+
+.gaspush{margin-top:14px;padding-top:14px;border-top:1px dashed #d7e2e6}
+.gaspush-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.gaspush-input{flex:1;min-width:220px;padding:10px 12px;border:1px solid #cfd9dd;
+  border-radius:10px;font-size:13px;font-family:inherit;direction:ltr;text-align:right}
+.btn2{background:#0b6b7e}
+.btn2:hover{background:#0b6b7e}
+.gaspush-hint{font-size:11px;color:#5b7684;margin-top:6px}
+.gaspush-status{margin-top:10px;font-size:12.5px}
+.gaspush-status .s{background:#eefaf3;border:1px solid #bfe6cf;color:#1c6b3f;
+  border-radius:10px;padding:10px 14px;display:inline-block}
+.gaspush-status .warn{background:#fff9ec;border:1px solid #f0dfb0;color:#7a5a12;
+  border-radius:10px;padding:10px 14px;display:inline-block}
+.gaspush-status .err{display:inline-block}
+
+#drop_d .s{font-size:12.5px;color:#5b7684;margin-top:5px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="maintabs">
-<div class="maintab on" data-tool="a">النشاط البدني</div><div class="maintab" data-tool="e">الموقف التنفيذي للتجهيزات</div><div class="maintab" data-tool="c">ملخص العقود</div>
+<div class="maintab on" data-tool="a">النشاط البدني</div><div class="maintab" data-tool="e">الموقف التنفيذي للتجهيزات</div><div class="maintab" data-tool="c">ملخص العقود</div><div class="maintab" data-tool="d">المخصص والاحتياج</div>
   </div>
   <div id="dlAllWrap">
-    <button id="dlAllBtn">⬇ تحميل كل الملفات الثلاثة</button>
+    <button id="dlAllBtn">⬇ تحميل كل الملفات الأربعة</button>
   </div>
 <div class="toolpanel" id="panel_a" style="">
 <div class="wrap">
@@ -188,6 +204,14 @@ h2{font-size:15px;font-weight:800;margin-bottom:4px}
     <div class="note" id="note_a"></div>
     <div style="margin-top:16px">
       <button class="btn" id="dl_a">⬇ تنزيل الملف المنظّف</button>
+      <div class="gaspush">
+        <div class="gaspush-row">
+          <input type="text" id="gasurl_a" class="gaspush-input" placeholder="رابط جوجل شيت (Web App URL ينتهي بـ /exec)" value="https://script.google.com/macros/s/AKfycbwIW1rHvLfSR3q-G1cKmg8xKESA38rGTSLdcOBFf15UXT5-OLAas4eUp7bGo5f6TeA4/exec">
+          <button class="btn btn2" id="push_a" type="button">☁️ رفع مباشر لجوجل شيت</button>
+        </div>
+        <div class="gaspush-hint">الرابط بيتحفظ تلقائيًا في المتصفح — تحطه مرة واحدة بس.</div>
+        <div id="pushmsg_a" class="gaspush-status"></div>
+      </div>
     </div>
   </div>
 
@@ -222,6 +246,14 @@ h2{font-size:15px;font-weight:800;margin-bottom:4px}
     <div class="note" id="note_e"></div>
     <div style="margin-top:16px">
       <button class="btn" id="dl_e">⬇ تنزيل الملف المنظّف</button>
+      <div class="gaspush">
+        <div class="gaspush-row">
+          <input type="text" id="gasurl_e" class="gaspush-input" placeholder="رابط جوجل شيت (Web App URL ينتهي بـ /exec)" value="https://script.google.com/macros/s/AKfycbxubh4Ok43GQ8V0t2VEqQNtcPbv-NlBc10ut_fc_R-EEw71EwjAyLOd6rAJ6y9ECh0Z/exec">
+          <button class="btn btn2" id="push_e" type="button">☁️ رفع مباشر لجوجل شيت</button>
+        </div>
+        <div class="gaspush-hint">الرابط بيتحفظ تلقائيًا في المتصفح — تحطه مرة واحدة بس.</div>
+        <div id="pushmsg_e" class="gaspush-status"></div>
+      </div>
     </div>
   </div>
 
@@ -256,6 +288,14 @@ h2{font-size:15px;font-weight:800;margin-bottom:4px}
     <div class="log" id="log_c"></div>
     <div style="margin-top:16px">
       <button class="btn" id="dl_c">⬇ تنزيل الملف المنظّف</button>
+      <div class="gaspush">
+        <div class="gaspush-row">
+          <input type="text" id="gasurl_c" class="gaspush-input" placeholder="رابط جوجل شيت (Web App URL ينتهي بـ /exec)" value="https://script.google.com/macros/s/AKfycbxdg5lRLCI4biUnUChOxuustUC-PNVLEYBd8EUWqzlJVSaQufRAcw5a9HXkmnNKaC_O/exec">
+          <button class="btn btn2" id="push_c" type="button">☁️ رفع مباشر لجوجل شيت</button>
+        </div>
+        <div class="gaspush-hint">الرابط بيتحفظ تلقائيًا في المتصفح — تحطه مرة واحدة بس.</div>
+        <div id="pushmsg_c" class="gaspush-status"></div>
+      </div>
     </div>
   </div>
 
@@ -267,6 +307,49 @@ h2{font-size:15px;font-weight:800;margin-bottom:4px}
   </div>
 </div>
 
+</div>
+<div class="toolpanel" id="panel_d" style="display:none">
+<div class="wrap">
+  <div class="hero">
+    <h1>منظّف المخصص والاحتياج</h1>
+  </div>
+
+  <div class="card">
+    <div id="drop_d">
+      <div class="ic">📦</div>
+      <div class="t">اسحب الملف هنا أو اضغط للاختيار</div>
+      <div class="s">ملفات Excel فقط (.xlsx / .xlsm) — لازم يكون فيه شيت اسمه "المجمع"</div>
+    </div>
+    <input type="file" id="file_d" accept=".xlsx,.xlsm,.xls">
+    <div id="msg_d" class="hide" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card hide" id="res_d">
+    <h2>نتيجة التنظيف</h2>
+    <div class="sub" id="fname_d"></div>
+    <div class="stats" id="stats_d"></div>
+    <div class="log" id="log_d"></div>
+    <div class="note" id="note_d"></div>
+    <div style="margin-top:16px">
+      <button class="btn" id="dl_d">⬇ تنزيل الملف المنظّف</button>
+      <div class="gaspush">
+        <div class="gaspush-row">
+          <input type="text" id="gasurl_d" class="gaspush-input" placeholder="رابط جوجل شيت (Web App URL ينتهي بـ /exec)" value="https://script.google.com/macros/s/AKfycbzXf0GT3jFmHdDxx3nk65ZLEg6gE1ZAxsT6cn48Eh0IgBf6avWe9LM-4vBmmAtEb7Z7/exec">
+          <button class="btn btn2" id="push_d" type="button">☁️ رفع مباشر لجوجل شيت</button>
+        </div>
+        <div class="gaspush-hint">الرابط بيتحفظ تلقائيًا في المتصفح — تحطه مرة واحدة بس.</div>
+        <div id="pushmsg_d" class="gaspush-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card hide" id="prev_d">
+    <h2>معاينة</h2>
+    <div class="sub">أول 12 صف من كل جدول</div>
+    <div class="tabs" id="tabs_d"></div>
+    <div class="scroll"><table id="tbl_d"></table></div>
+  </div>
+</div>
 </div>
 </div>
 <script>/*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
@@ -293,6 +376,143 @@ var o=((a=s[17])==null?void 0:a[0])?Ob(e,e[_b(s[17][0].data)][0]):[];var l=vb(s[
 var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.s.r;c<=n.e.r;++c){i=Ta(c);for(f=n.s.c;f<=n.e.c;++f){r=s[f]+i;t=l?(e[c]||[])[f]:e[r];a="";if(t===undefined)continue;else if(t.F!=null){r=t.F;if(!t.f)continue;a=t.f;if(r.indexOf(":")==-1)r=r+":"+r}if(t.f!=null)a=t.f;else if(t.t=="z")continue;else if(t.t=="n"&&t.v!=null)a=""+t.v;else if(t.t=="b")a=t.v?"TRUE":"FALSE";else if(t.w!==undefined)a="'"+t.w;else if(t.v===undefined)continue;else if(t.t=="s")a="'"+t.v;else a=""+t.v;o[o.length]=r+"="+a}}return o}function xw(e,r,t){var a=t||{};var n=+!a.skipHeader;var i=e||{};var s=0,f=0;if(i&&a.origin!=null){if(typeof a.origin=="number")s=a.origin;else{var o=typeof a.origin=="string"?Oa(a.origin):a.origin;s=o.r;f=o.c}}var l;var c={s:{c:0,r:0},e:{c:f,r:s+r.length-1+n}};if(i["!ref"]){var h=Da(i["!ref"]);c.e.c=Math.max(c.e.c,h.e.c);c.e.r=Math.max(c.e.r,h.e.r);if(s==-1){s=h.e.r+1;c.e.r=s+r.length-1+n}}else{if(s==-1){s=0;c.e.r=r.length-1+n}}var u=a.header||[],d=0;r.forEach(function(e,r){rr(e).forEach(function(t){if((d=u.indexOf(t))==-1)u[d=u.length]=t;var o=e[t];var c="z";var h="";var v=Ra({c:f+d,r:s+r+n});l=Rw(i,v);if(o&&typeof o==="object"&&!(o instanceof Date)){i[v]=o}else{if(typeof o=="number")c="n";else if(typeof o=="boolean")c="b";else if(typeof o=="string")c="s";else if(o instanceof Date){c="d";if(!a.cellDates){c="n";o=fr(o)}h=a.dateNF||X[14]}else if(o===null&&a.nullError){c="e";o=0}if(!l)i[v]=l={t:c,v:o};else{l.t=c;l.v=o;delete l.w;delete l.R;if(h)l.z=h}if(h)l.z=h}})});c.e.c=Math.max(c.e.c,f+u.length-1);var v=Ta(s);if(n)for(d=0;d<u.length;++d)i[ya(d+f)+v]={t:"s",v:u[d]};i["!ref"]=Na(c);return i}function Ow(e,r){return xw(null,e,r)}function Rw(e,r,t){if(typeof r=="string"){if(Array.isArray(e)){var a=Oa(r);if(!e[a.r])e[a.r]=[];return e[a.r][a.c]||(e[a.r][a.c]={t:"z"})}return e[r]||(e[r]={t:"z"})}if(typeof r!="number")return Rw(e,Ra(r));return Rw(e,Ra({r:r,c:t||0}))}function Iw(e,r){if(typeof r=="number"){if(r>=0&&e.SheetNames.length>r)return r;throw new Error("Cannot find sheet # "+r)}else if(typeof r=="string"){var t=e.SheetNames.indexOf(r);if(t>-1)return t;throw new Error("Cannot find sheet name |"+r+"|")}else throw new Error("Cannot find sheet |"+r+"|")}function Nw(){return{SheetNames:[],Sheets:{}}}function Dw(e,r,t,a){var n=1;if(!t)for(;n<=65535;++n,t=undefined)if(e.SheetNames.indexOf(t="Sheet"+n)==-1)break;if(!t||e.SheetNames.length>=65535)throw new Error("Too many worksheets");if(a&&e.SheetNames.indexOf(t)>=0){var i=t.match(/(^.*?)(\d+)$/);n=i&&+i[2]||0;var s=i&&i[1]||t;for(++n;n<=65535;++n)if(e.SheetNames.indexOf(t=s+n)==-1)break}Jp(t);if(e.SheetNames.indexOf(t)>=0)throw new Error("Worksheet with name |"+t+"| already exists!");e.SheetNames.push(t);e.Sheets[t]=r;return t}function Fw(e,r,t){if(!e.Workbook)e.Workbook={};if(!e.Workbook.Sheets)e.Workbook.Sheets=[];var a=Iw(e,r);if(!e.Workbook.Sheets[a])e.Workbook.Sheets[a]={};switch(t){case 0:;case 1:;case 2:break;default:throw new Error("Bad sheet visibility setting "+t);}e.Workbook.Sheets[a].Hidden=t}function Pw(e,r){e.z=r;return e}function Lw(e,r,t){if(!r){delete e.l}else{e.l={Target:r};if(t)e.l.Tooltip=t}return e}function Mw(e,r,t){return Lw(e,"#"+r,t)}function Uw(e,r,t){if(!e.c)e.c=[];e.c.push({t:r,a:t||"SheetJS"})}function Bw(e,r,t,a){var n=typeof r!="string"?r:Da(r);var i=typeof r=="string"?r:Na(r);for(var s=n.s.r;s<=n.e.r;++s)for(var f=n.s.c;f<=n.e.c;++f){var o=Rw(e,s,f);o.t="n";o.F=i;delete o.v;if(s==n.s.r&&f==n.s.c){o.f=t;if(a)o.D=true}}return e}var Ww={encode_col:ya,encode_row:Ta,encode_cell:Ra,encode_range:Na,decode_col:Ca,decode_row:ka,split_cell:xa,decode_cell:Oa,decode_range:Ia,format_cell:Pa,sheet_add_aoa:Ma,sheet_add_json:xw,sheet_add_dom:Gm,aoa_to_sheet:Ua,json_to_sheet:Ow,table_to_sheet:jm,table_to_book:Xm,sheet_to_csv:yw,sheet_to_txt:Sw,sheet_to_json:Aw,sheet_to_html:Vm,sheet_to_formulae:_w,sheet_to_row_object_array:Aw,sheet_get_cell:Rw,book_new:Nw,book_append_sheet:Dw,book_set_sheet_visibility:Fw,cell_set_number_format:Pw,cell_set_hyperlink:Lw,cell_set_internal_link:Mw,cell_add_comment:Uw,sheet_set_array_formula:Bw,consts:{SHEET_VISIBLE:0,SHEET_HIDDEN:1,SHEET_VERY_HIDDEN:2}};var Hw;function zw(e){Hw=e}function Vw(e,r){var t=Hw();var a=r==null?{}:r;if(e==null||e["!ref"]==null){t.push(null);return t}var n=Da(e["!ref"]);var i=a.FS!==undefined?a.FS:",",s=i.charCodeAt(0);var f=a.RS!==undefined?a.RS:"\n",o=f.charCodeAt(0);var l=new RegExp((i=="|"?"\\|":i)+"+$");var c="",h=[];a.dense=Array.isArray(e);var u=a.skipHidden&&e["!cols"]||[];var d=a.skipHidden&&e["!rows"]||[];for(var v=n.s.c;v<=n.e.c;++v)if(!(u[v]||{}).hidden)h[v]=ya(v);var p=n.s.r;var g=false,m=0;t._read=function(){if(!g){g=true;return t.push("\ufeff")}while(p<=n.e.r){++p;if((d[p-1]||{}).hidden)continue;c=Cw(e,n,p-1,h,s,o,i,a);if(c!=null){if(a.strip)c=c.replace(l,"");if(c||a.blankrows!==false)return t.push((m++?f:"")+c)}}return t.push(null)};return t}function Gw(e,r){var t=Hw();var a=r||{};var n=a.header!=null?a.header:Bm;var i=a.footer!=null?a.footer:Wm;t.push(n);var s=Ia(e["!ref"]);a.dense=Array.isArray(e);t.push(zm(e,s,a));var f=s.s.r;var o=false;t._read=function(){if(f>s.e.r){if(!o){o=true;t.push("</table>"+i)}return t.push(null)}while(f<=s.e.r){t.push(Um(e,s,f,a));++f;break}};return t}function jw(e,r){var t=Hw({objectMode:true});if(e==null||e["!ref"]==null){t.push(null);return t}var a={t:"n",v:0},n=0,i=1,s=[],f=0,o="";var l={s:{r:0,c:0},e:{r:0,c:0}};var c=r||{};var h=c.range!=null?c.range:e["!ref"];if(c.header===1)n=1;else if(c.header==="A")n=2;else if(Array.isArray(c.header))n=3;switch(typeof h){case"string":l=Da(h);break;case"number":l=Da(e["!ref"]);l.s.r=h;break;default:l=h;}if(n>0)i=0;var u=Ta(l.s.r);var d=[];var v=0;var p=Array.isArray(e);var g=l.s.r,m=0;var b={};if(p&&!e[g])e[g]=[];var w=c.skipHidden&&e["!cols"]||[];var k=c.skipHidden&&e["!rows"]||[];for(m=l.s.c;m<=l.e.c;++m){if((w[m]||{}).hidden)continue;d[m]=ya(m);a=p?e[g][m]:e[d[m]+u];switch(n){case 1:s[m]=m-l.s.c;break;case 2:s[m]=d[m];break;case 3:s[m]=c.header[m-l.s.c];break;default:if(a==null)a={w:"__EMPTY",t:"s"};o=f=Pa(a,null,c);v=b[f]||0;if(!v)b[f]=1;else{do{o=f+"_"+v++}while(b[o]);b[f]=v;b[o]=1}s[m]=o;}}g=l.s.r+i;t._read=function(){while(g<=l.e.r){if((k[g-1]||{}).hidden)continue;var r=Tw(e,l,g,d,n,s,p,c);++g;if(r.isempty===false||(n===1?c.blankrows!==false:!!c.blankrows)){t.push(r.row);return}}return t.push(null)};return t}var Xw={to_json:jw,to_html:Gw,to_csv:Vw,set_readable:zw};if(typeof vm!=="undefined")e.parse_xlscfb=vm;e.parse_zip=Xb;e.read=iw;e.readFile=sw;e.readFileSync=sw;e.write=gw;e.writeFile=bw;e.writeFileSync=bw;e.writeFileAsync=kw;e.utils=Ww;e.writeXLSX=pw;e.writeFileXLSX=ww;e.SSF=Ve;if(typeof Xw!=="undefined")e.stream=Xw;if(typeof Ke!=="undefined")e.CFB=Ke;if(typeof require!=="undefined"){var $w=undefined;if(($w||{}).Readable)zw($w.Readable)}}if(typeof exports!=="undefined")make_xlsx_lib(exports);else if(typeof module!=="undefined"&&module.exports)make_xlsx_lib(module.exports);else if(typeof define==="function"&&define.amd)define("xlsx",function(){if(!XLSX.version)make_xlsx_lib(XLSX);return XLSX});else make_xlsx_lib(XLSX);if(typeof window!=="undefined"&&!window.XLSX)try{window.XLSX=XLSX}catch(e){}
 </script>
 <script>
+
+/* ══════════════════════════════════════════════════════════════════════
+   رفع مباشر لجوجل شيت (مشترك بين التبويبات الثلاثة)
+   نفس آلية الأمان المستخدمة في أداة "رفع بيانات الإصلاحات وقطع الغيار":
+   - الإرسال (POST) بـ Content-Type: text/plain لتفادي الـ preflight
+     (Apps Script مش بيتعامل مع OPTIONS).
+   - معملش إعادة محاولة تلقائية لو فشلت قراءة الرد، لأن الكتابة ممكن تكون
+     نجحت فعلاً في السيرفر حتى لو المتصفح مقدرش يقرا الرد (قيود CORS).
+   - خطوة تحقق منفصلة (GET بـ ?refresh=1) للتأكد من نتيجة العملية فعليًا،
+     بدل إعادة إرسال البيانات.
+   ══════════════════════════════════════════════════════════════════════ */
+function gasWait(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
+
+function gasPostToGAS(url, payload){
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(function(res){ return res.json(); });
+}
+
+function gasSendOnce(url, payload){
+  return gasPostToGAS(url, payload).catch(function(){ return null; });
+}
+
+function gasFetchFresh(url, attemptsLeft){
+  var sep = url.indexOf('?') === -1 ? '?' : '&';
+  return fetch(url + sep + 'refresh=1&t=' + Date.now())
+    .then(function(res){ return res.json(); })
+    .catch(function(err){
+      if (attemptsLeft <= 0) throw err;
+      return gasWait(1200).then(function(){ return gasFetchFresh(url, attemptsLeft - 1); });
+    });
+}
+
+function gasVerifyCounts(url, expectedCounts, attemptsLeft){
+  return gasFetchFresh(url, 2).then(function(data){
+    var counts = (data && data.counts) ? data.counts : {};
+    var mismatches = [];
+    Object.keys(expectedCounts).forEach(function(k){
+      if (counts[k] !== expectedCounts[k]) mismatches.push(k);
+    });
+    if (!mismatches.length || attemptsLeft <= 0) {
+      return { ok: !mismatches.length, counts: counts, mismatches: mismatches, data: data };
+    }
+    return gasWait(1500).then(function(){ return gasVerifyCounts(url, expectedCounts, attemptsLeft - 1); });
+  }).catch(function(err){
+    return { ok: false, error: err && err.message ? err.message : String(err) };
+  });
+}
+
+function gasTablesToSheetsPayload(tables){
+  return tables.map(function(t){
+    return {
+      name: t.name,
+      headers: t.cols,
+      rows: t.rows.map(function(r){
+        return t.cols.map(function(c){
+          var v = r[c];
+          if (v instanceof Date) return v.toISOString().slice(0, 10);
+          if (v === undefined) return null;
+          return v;
+        });
+      })
+    };
+  });
+}
+
+function gasSetupPush(suffix, getTables, keyMap){
+  var byId = function(id){ return document.getElementById(id + '_' + suffix); };
+  var urlInput = byId('gasurl');
+  var btn = byId('push');
+  var statusEl = byId('pushmsg');
+  if (!urlInput || !btn || !statusEl) return;
+
+  var storageKey = 'gas_url_' + suffix;
+  try {
+    var saved = localStorage.getItem(storageKey);
+    if (saved) urlInput.value = saved;
+  } catch (e) {}
+
+  urlInput.addEventListener('change', function(){
+    try { localStorage.setItem(storageKey, urlInput.value.trim()); } catch (e) {}
+  });
+
+  btn.onclick = function(){
+    var tables = getTables();
+    if (!tables || !tables.length){
+      statusEl.innerHTML = '<div class="err">⚠️ لازم تنظّف ملف الأول قبل الرفع.</div>';
+      return;
+    }
+    var url = (urlInput.value || '').trim();
+    if (!url){
+      statusEl.innerHTML = '<div class="err">⚠️ حط رابط الويب آب بتاع جوجل شيت الأول (لازم ينتهي بـ /exec).</div>';
+      return;
+    }
+    try { localStorage.setItem(storageKey, url); } catch (e) {}
+
+    var sheets = gasTablesToSheetsPayload(tables);
+    var expectedCounts = {};
+    sheets.forEach(function(s){
+      var key = keyMap[s.name];
+      if (key) expectedCounts[key] = s.rows.length;
+    });
+
+    btn.disabled = true;
+    var origText = btn.textContent;
+    btn.textContent = '⏳ جاري الرفع...';
+    statusEl.innerHTML = '<div class="warn">جاري إرسال البيانات لجوجل شيت...</div>';
+
+    gasSendOnce(url, { sheets: sheets }).then(function(){
+      statusEl.innerHTML = '<div class="warn">تم إرسال البيانات، جاري التحقق من وصولها لجوجل شيت...</div>';
+      return gasVerifyCounts(url, expectedCounts, 3);
+    }).then(function(result){
+      if (result.ok){
+        var countsTxt = Object.keys(result.counts || {}).map(function(k){
+          return k + ': ' + result.counts[k];
+        }).join(' · ');
+        statusEl.innerHTML = '<div class="s">✅ تم الرفع والتحقق بنجاح — البيانات دلوقتي على جوجل شيت.'
+          + (countsTxt ? ('<br><span style="font-size:11.5px;opacity:.75">' + countsTxt + '</span>') : '') + '</div>';
+      } else if (result.error) {
+        statusEl.innerHTML = '<div class="warn">⚠️ اترفعت البيانات (على الأرجح)، لكن مقدرناش نتحقق من جوجل شيت للتأكيد: '
+          + result.error + '. افتح الشيت وتأكد بنفسك.</div>';
+      } else {
+        statusEl.innerHTML = '<div class="warn">⚠️ اترفعت البيانات لكن الأعداد اللي رجعت من جوجل شيت مش مطابقة تمامًا ('
+          + (result.mismatches || []).join('، ') + '). افتح الشيت وتأكد إن البيانات صح، أو جرب تضغط الزر تاني.</div>';
+      }
+    }).catch(function(err){
+      statusEl.innerHTML = '<div class="err">⚠️ فشل الاتصال بجوجل شيت: ' + (err && err.message ? err.message : String(err))
+        + ' — تأكد من الرابط وإن الويب آب متاح لأي حد (Anyone).</div>';
+    }).finally(function(){
+      btn.disabled = false;
+      btn.textContent = origText;
+    });
+  };
+}
+
 (function(){
 
 /* ══ أدوات مشتركة (نفس أدوات منظّف التجهيزات) ══ */
@@ -644,6 +864,13 @@ function preview(i){
 }
 
 $('dl').onclick=function(){ if(WBOUT) XLSX.writeFile(WBOUT,OUTNAME,{compression:true}); };
+
+gasSetupPush('a', function(){ return TABLES; }, {
+  'التوزيع_التفصيلي':'distribution',
+  'دليل_الأصناف':'itemsGuide',
+  'ملخص_حسب_الشركة':'byCompany',
+  'ملخص_حسب_المنطقة':'byRegion'
+});
 
 })();
 (function(){
@@ -1086,6 +1313,15 @@ function preview(i){
 
 $('dl').onclick=function(){ if(WBOUT) XLSX.writeFile(WBOUT,OUTNAME,{compression:true}); };
 
+gasSetupPush('e', function(){ return TABLES; }, {
+  'التوزيع_حسب_المنطقة_والصنف':'distribution',
+  'بنود_قيد_اعتماد_امر_العمل':'pendingItems',
+  'دليل_الأصناف':'itemsGuide',
+  'مؤشرات_الموردين':'supplierKpi',
+  'ملخص_حسب_المنطقة':'byRegion',
+  'ملخص_حسب_المورد':'bySupplier'
+});
+
 })();
 (function(){
 
@@ -1252,6 +1488,12 @@ function preview(i){
 
 $('dl').onclick=function(){ if(WBOUT) XLSX.writeFile(WBOUT,OUTNAME,{compression:true}); };
 
+gasSetupPush('c', function(){ return TABLES; }, {
+  'العقود':'contracts',
+  'ملخص_العقود':'summary',
+  'حسب_المورد':'bySupplier'
+});
+
 
 var HEADERS=['محضر_الإسناد','اسم_المورد','نوع_العقد','رقم_العقد','رقم_المشروع_بالنظام','رقم_أمر_العمل',
 'المفوض','رقم_الجوال','البريد_الإلكتروني','إشعار_ترسية_الأعمال','المجموعات','عدد_المدارس',
@@ -1386,13 +1628,322 @@ function CLEAN(wb){
 
 })();
 
+(function(){
+
+/* ══ أدوات مشتركة ══ */
+function txt(v){
+  if(v===null||v===undefined) return null;
+  if(v instanceof Date) return v;
+  if(typeof v==='number') return v;
+  var s=String(v).replace(/[‎‏]/g,'').replace(/\s*\n\s*/g,' ').replace(/[ \t]+/g,' ').trim();
+  return s===''?null:s;
+}
+function str(v){ var t=txt(v); return t===null?null:(typeof t==='object'?t:String(t)); }
+function num(v){
+  if(v===null||v===undefined) return null;
+  if(typeof v==='number') return v;
+  var s=String(v).replace(/,/g,'').replace(/[^\d.\-]/g,'');
+  if(s===''||s==='-'||s==='.') return null;
+  var n=parseFloat(s); return isNaN(n)?null:n;
+}
+/* شبكة خام من غير ملء الخلايا المدمجة — عمدًا هنا. عمود "المورد" في شيت
+   "المجمع" فيه دمج خلايا حقيقي (مثلاً B10:B57)، ولو ملأناه زي باقي
+   التبويبات هيبوّظ اكتشاف صفوف عناوين الأقسام (اللي بيعتمد أساسًا على إن
+   خانة المورد فاضية أصلاً في صف العنوان قبل أي تعبئة). التعبئة الفعلية
+   لعمودي "القسم" و"المورد" بتتم يدويًا بالكود بالظبط زي ما كانت بتتعمل
+   في نسخة بايثون (openpyxl مبيملاش الخلايا المدمجة تلقائيًا برضه). */
+function rawGrid(ws){
+  var ref=ws['!ref']; if(!ref) return {g:[],R:0,C:0};
+  var rng=XLSX.utils.decode_range(ref);
+  var R=rng.e.r+1, C=rng.e.c+1, g=[];
+  for(var r=0;r<R;r++){ g[r]=[]; for(var c=0;c<C;c++){
+    var cell=ws[XLSX.utils.encode_cell({r:r,c:c})];
+    g[r][c]= cell? cell.v : null;
+  }}
+  return {g:g,R:R,C:C};
+}
+function makeSheet(rows,cols,pctCols){
+  pctCols=pctCols||[];
+  var aoa=[cols];
+  rows.forEach(function(r){ aoa.push(cols.map(function(c){
+    var v=r[c]; return (v===undefined)?null:v;
+  })); });
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+  var rng=XLSX.utils.decode_range(ws['!ref']);
+  cols.forEach(function(c,ci){
+    if(pctCols.indexOf(c)<0) return;
+    for(var r=1;r<=rng.e.r;r++){
+      var cell=ws[XLSX.utils.encode_cell({r:r,c:ci})];
+      if(!cell||cell.v===null||cell.v===undefined||typeof cell.v!=='number') continue;
+      cell.z='0.0%';
+    }
+  });
+  ws['!freeze']={xSplit:0,ySplit:1};
+  return ws;
+}
+
+/* ══ فهرسة الأعمدة (0-based) — شيت "المجمع"، ترويسة الجدول في الصف
+   الرابع (index 3). نفس فهرسة clean_mukhassas.py بالظبط، ناقص واحد من
+   كل رقم عشان openpyxl بيبدأ من 1 و SheetJS من 0. ══ */
+var COL_INDEX=0, COL_SUPPLIER=1, COL_ITEM=2,
+    COL_ALLOC_MAKKAH=3, COL_ALLOC_JEDDAH=4, COL_ALLOC_TAIF=5,
+    COL_ALLOC_QUNFUDHAH=6, COL_ALLOC_LAYTH=7,
+    COL_ALLOC_MADINAH=8, COL_ALLOC_YANBU=9, COL_ALLOC_ALULA=10, COL_ALLOC_MAHD=11,
+    COL_PRICE=13, COL_ALLOC_TOTAL_VAL_RAW=14,
+    COL_TOTAL_CHECK=15,
+    COL_NEED_MAKKAH=16, COL_NEED_JEDDAH=17, COL_NEED_TAIF=18, COL_NEED_MADINAH=19,
+    COL_PPP_MAKKAH=20, COL_PPP_JEDDAH=21, COL_PPP_MADINAH=22;
+
+var HEADER_ROW=3;
+
+/* خريطة قسم→مورد معروفة من تنظيف ملف "التجهيزات المدرسية" — قسم "الصالات
+   الرياضية" تحديدًا مفيهوش أي إعادة ذكر لاسم المورد في الملف الخام، فلو
+   اعتمدنا على forward-fill بس هيتوّرث اسم الشركة اللي قبله غلط. */
+var DEPT_SUPPLIER_MAP={
+  'المقاعد والطاولات':'شركة مصنع الوطن المحدودة',
+  'الأثاث المكتبي':'شركة مصنع الوطن المحدودة',
+  'غرف المعلمين':'شركة مصنع الوطن المحدودة',
+  'العيادة الصحية':'شركة مصنع الوطن المحدودة',
+  'مركز مصادر التعلم':'شركة مصنع الوطن المحدودة',
+  'مختبرات العلوم':'شركة الرجاء المحدودة',
+  'فصول رياض الأطفال':'شركة العميد للأثاث الخشبي',
+  'الصالات الرياضية':'شركة بيت الرياضة الفالح'
+};
+
+var HEADERS_D=['القسم','المورد','اسم_الصنف','سعر_الوحدة',
+  'مخصص_مكة','مخصص_جدة','مخصص_الطائف','مخصص_المدينة','مخصص_الكمية_الكلية','مخصص_القيمة_الكلية',
+  'احتياج_مكة','احتياج_جدة','احتياج_الطائف','احتياج_المدينة','احتياج_الكمية_الكلية','احتياج_القيمة_الكلية',
+  'PPP_مكة','PPP_جدة','PPP_الطائف','PPP_المدينة','PPP_الكمية_الكلية','PPP_القيمة_الكلية',
+  'فرق_الكمية','فرق_القيمة','نسبة_الاحتياج','ملاحظة'];
+
+function sumOrNone(vals){
+  var allNull=vals.every(function(v){return v===null||v===undefined;});
+  if(allNull) return null;
+  return vals.reduce(function(a,v){return a+(v||0);},0);
+}
+
+function findMukhassasSheet(wb){
+  if(wb.Sheets['المجمع']) return wb.Sheets['المجمع'];
+  var found=null;
+  wb.SheetNames.forEach(function(nm){
+    if(found) return;
+    if(str(nm)==='المجمع') found=wb.Sheets[nm];
+  });
+  return found;
+}
+
+function CLEAN(wb){
+  var ws=findMukhassasSheet(wb);
+  if(!ws) return null;
+  var G=rawGrid(ws);
+  if(!G.R) return null;
+
+  var records=[], lastDept=null, lastSupplier=null, totalRowAlloc=null;
+
+  for(var r=HEADER_ROW+1; r<G.R; r++){
+    var row=G.g[r]||[];
+    var idxVal=str(row[COL_INDEX]);
+    var item=str(row[COL_ITEM]);
+    var supplier=str(row[COL_SUPPLIER]);
+
+    if(idxVal==='إجمالي المخصص'){
+      totalRowAlloc=num(row[COL_TOTAL_CHECK]);
+      continue;
+    }
+    if(idxVal==='الفرق'){ continue; }
+
+    var noDataCols=true;
+    for(var c=COL_ALLOC_MAKKAH;c<=COL_ALLOC_TOTAL_VAL_RAW;c++){
+      if(num(row[c])!==null){ noDataCols=false; break; }
+    }
+    var isSectionHeader=(idxVal===null && supplier===null && item!==null && noDataCols);
+    if(isSectionHeader){ lastDept=item; continue; }
+
+    if(item===null) continue;
+
+    if(supplier!==null) lastSupplier=supplier;
+    var expectedSupplier=DEPT_SUPPLIER_MAP[lastDept];
+    if(expectedSupplier) lastSupplier=expectedSupplier;
+
+    var price=num(row[COL_PRICE]);
+
+    var allocJeddah=sumOrNone([num(row[COL_ALLOC_JEDDAH])]);
+    var allocTaif=sumOrNone([num(row[COL_ALLOC_TAIF])]);
+    var allocMakkah=sumOrNone([num(row[COL_ALLOC_MAKKAH]), num(row[COL_ALLOC_QUNFUDHAH]), num(row[COL_ALLOC_LAYTH])]);
+    var allocMadinah=sumOrNone([num(row[COL_ALLOC_MADINAH]), num(row[COL_ALLOC_YANBU]), num(row[COL_ALLOC_ALULA]), num(row[COL_ALLOC_MAHD])]);
+    var allocTotal=(allocMakkah||0)+(allocJeddah||0)+(allocTaif||0)+(allocMadinah||0);
+
+    var needMakkah=sumOrNone([num(row[COL_NEED_MAKKAH])]);
+    var needJeddah=sumOrNone([num(row[COL_NEED_JEDDAH])]);
+    var needTaif=sumOrNone([num(row[COL_NEED_TAIF])]);
+    var needMadinah=sumOrNone([num(row[COL_NEED_MADINAH])]);
+    var needTotal=(needMakkah||0)+(needJeddah||0)+(needTaif||0)+(needMadinah||0);
+
+    var pppMakkah=num(row[COL_PPP_MAKKAH])||0;
+    var pppJeddah=num(row[COL_PPP_JEDDAH])||0;
+    var pppMadinah=num(row[COL_PPP_MADINAH])||0;
+    var pppTotal=pppMakkah+pppJeddah+pppMadinah;
+
+    var allocVal=(price!==null)?Math.round((price||0)*allocTotal*100)/100:null;
+    var needVal=(price!==null)?Math.round((price||0)*needTotal*100)/100:null;
+    var pppVal=(price!==null && pppTotal)?Math.round((price||0)*pppTotal*100)/100:null;
+
+    var diffQty=(allocTotal+pppTotal)-needTotal;
+    var diffVal=(price!==null)?Math.round(diffQty*(price||0)*100)/100:null;
+    var needRatio=(allocTotal+pppTotal)?Math.round((needTotal/(allocTotal+pppTotal))*1000000)/1000000:null;
+
+    records.push({
+      'القسم':lastDept,
+      'المورد':lastSupplier,
+      'اسم_الصنف':item,
+      'سعر_الوحدة':price,
+      'مخصص_مكة':allocMakkah,
+      'مخصص_جدة':allocJeddah,
+      'مخصص_الطائف':allocTaif,
+      'مخصص_المدينة':allocMadinah,
+      'مخصص_الكمية_الكلية':(allocMakkah!==null||allocJeddah!==null||allocTaif!==null||allocMadinah!==null)?allocTotal:null,
+      'مخصص_القيمة_الكلية':allocVal,
+      'احتياج_مكة':needMakkah,
+      'احتياج_جدة':needJeddah,
+      'احتياج_الطائف':needTaif,
+      'احتياج_المدينة':needMadinah,
+      'احتياج_الكمية_الكلية':(needMakkah!==null||needJeddah!==null||needTaif!==null||needMadinah!==null)?needTotal:null,
+      'احتياج_القيمة_الكلية':needVal,
+      'PPP_مكة':pppMakkah||null,
+      'PPP_جدة':pppJeddah||null,
+      'PPP_الطائف':null,
+      'PPP_المدينة':pppMadinah||null,
+      'PPP_الكمية_الكلية':pppTotal||null,
+      'PPP_القيمة_الكلية':pppVal,
+      'فرق_الكمية':Math.round(diffQty*100)/100,
+      'فرق_القيمة':diffVal,
+      'نسبة_الاحتياج':needRatio,
+      'ملاحظة': idxVal==='*' ? 'رقم صنف غير قياسي ("*") في الملف الخام' : null
+    });
+  }
+
+  var computedAllocValTotal=records.reduce(function(a,r){return a+(r['مخصص_القيمة_الكلية']||0);},0);
+  computedAllocValTotal=Math.round(computedAllocValTotal*100)/100;
+  var matched = Math.abs((totalRowAlloc||0)-computedAllocValTotal) < 5;
+
+  var notesRows=[
+    {'الملاحظة':'المصدر المستخدم','القيمة':'شيت "المجمع" فقط من الملف الخام المرفوع.'},
+    {'الملاحظة':'عدد الأصناف المستخرجة','القيمة':records.length},
+    {'الملاحظة':'إجمالي المخصص في الملف الخام (صف الإجمالي)','القيمة':totalRowAlloc},
+    {'الملاحظة':'مجموع قيمة المخصص المحسوب من كل الأصناف','القيمة':computedAllocValTotal},
+    {'الملاحظة':'متطابقان؟','القيمة':matched?'نعم — تطابق تام':'لا — راجع الملف الخام، ممكن يكون شكله مختلف عن المتوقع'},
+    {'الملاحظة':'تجميع المناطق الفرعية','القيمة':'"مخصص_مكة" = مكة المكرمة + القنفذة + الليث. "مخصص_المدينة" = المدينة المنورة + ينبع + العلا + المهد. الاحتياج وPPP مجمّعين على مستوى المنطقة الرئيسية أصلاً في المصدر.'},
+    {'الملاحظة':'صيغة الفرق والنسبة','القيمة':'فرق_الكمية = (مخصص + PPP) − احتياج. فرق_القيمة = فرق_الكمية × سعر_الوحدة. نسبة_الاحتياج = احتياج ÷ (مخصص + PPP).'}
+  ];
+
+  var T=[
+    {name:'المخصص_والاحتياج', rows:records, cols:HEADERS_D, pctCols:['نسبة_الاحتياج']},
+    {name:'ملاحظات_التحقق', rows:notesRows, cols:['الملاحظة','القيمة']}
+  ];
+
+  return {
+    tables:T,
+    stats:[
+      ['أصناف',records.length],
+      ['تحقق إجمالي المخصص', matched ? '✔ مطابق' : '✘ غير مطابق']
+    ],
+    note: matched
+      ? 'تحقق تلقائي: مجموع "مخصص_القيمة_الكلية" لكل الأصناف طابق صف "إجمالي المخصص" في الملف الخام تمامًا.'
+      : '⚠️ تحقق تلقائي فشل: مجموع "مخصص_القيمة_الكلية" مش مطابق لصف "إجمالي المخصص" في الملف الخام — ده معناه إن شكل الملف مختلف شوية عن المتوقع (مثلاً اسم الشيت مش "المجمع" بالظبط، أو ترويسة الجدول مش في الصف الرابع). راجع النتيجة كويس قبل الرفع.'
+  };
+}
+
+/* ══ واجهة ══ */
+var TABLES=[], WBOUT=null, OUTNAME='';
+var $=function(id){return document.getElementById(id+'_d');};
+var drop=$('drop'), fileEl=$('file');
+drop.onclick=function(){ fileEl.click(); };
+['dragenter','dragover'].forEach(function(e){ drop.addEventListener(e,function(ev){
+  ev.preventDefault(); drop.classList.add('over'); }); });
+['dragleave','drop'].forEach(function(e){ drop.addEventListener(e,function(ev){
+  ev.preventDefault(); drop.classList.remove('over'); }); });
+drop.addEventListener('drop',function(ev){
+  ev.preventDefault();
+  if(ev.dataTransfer.files&&ev.dataTransfer.files[0]) handle(ev.dataTransfer.files[0]);
+});
+fileEl.onchange=function(){ if(fileEl.files[0]) handle(fileEl.files[0]); };
+
+function showErr(m){
+  $('msg').className=''; $('msg').innerHTML='<div class="err">⚠️ '+m+'</div>';
+  $('res').className='card hide'; $('prev').className='card hide';
+}
+
+function handle(f){
+  $('msg').className='hide'; TABLES=[];
+  var fr=new FileReader();
+  fr.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      var out=CLEAN(wb);
+      if(!out||!out.tables.length||!out.tables[0].rows.length){ showErr('مقدرتش ألاقي شيت اسمه "المجمع" بنفس الشكل المتوقع (ترويسة الجدول في الصف الرابع). اتأكد إنه نفس نوع ملف "المخصصات والاحتياج".'); return; }
+      TABLES=out.tables;
+      WBOUT=XLSX.utils.book_new();
+      TABLES.forEach(function(t){
+        XLSX.utils.book_append_sheet(WBOUT, makeSheet(t.rows,t.cols,t.pctCols), t.name.substring(0,31));
+      });
+      OUTNAME=f.name.replace(/\.(xlsx|xlsm|xls)$/i,'')+' - منظف.xlsx';
+      render(f.name,out.stats,out.note);
+    }catch(err){ showErr('حصل خطأ أثناء القراءة: '+err.message); }
+  };
+  fr.readAsArrayBuffer(f);
+}
+
+function render(name,stats,note){
+  $('fname').textContent=name;
+  $('stats').innerHTML=stats.map(function(s){
+    return '<div class="st"><b>'+s[1]+'</b><span>'+s[0]+'</span></div>';
+  }).join('');
+  $('log').innerHTML='';
+  $('note').innerHTML=note?('<div>'+note+'</div>'):'';
+  $('note').style.display=note?'':'none';
+  $('res').className='card';
+  $('tabs').innerHTML=TABLES.map(function(t,i){
+    return '<div class="tb'+(i===0?' on':'')+'" data-i="'+i+'">'+t.name+' ('+t.rows.length+')</div>';
+  }).join('');
+  Array.prototype.forEach.call($('tabs').children,function(el){
+    el.onclick=function(){
+      Array.prototype.forEach.call($('tabs').children,function(x){x.className='tb';});
+      el.className='tb on'; preview(+el.getAttribute('data-i'));
+    };
+  });
+  preview(0); $('prev').className='card';
+}
+
+function fmtCell(v){
+  if(v===null||v===undefined) return '';
+  if(v instanceof Date) return v.toISOString().slice(0,10);
+  if(typeof v==='number') return (Math.round(v*10000)/10000);
+  return String(v);
+}
+function preview(i){
+  var t=TABLES[i];
+  var h='<thead><tr>'+t.cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>';
+  t.rows.slice(0,12).forEach(function(r){
+    h+='<tr>'+t.cols.map(function(c){return '<td>'+fmtCell(r[c])+'</td>';}).join('')+'</tr>';
+  });
+  $('tbl').innerHTML=h+'</tbody>';
+}
+
+$('dl').onclick=function(){ if(WBOUT) XLSX.writeFile(WBOUT,OUTNAME,{compression:true}); };
+
+gasSetupPush('d', function(){ return TABLES; }, {
+  'المخصص_والاحتياج':'data'
+});
+
+})();
+
 /* ── تبديل التبويبات ── */
 Array.prototype.forEach.call(document.querySelectorAll('.maintab'), function(el){
   el.onclick = function(){
     var tool = el.getAttribute('data-tool');
     Array.prototype.forEach.call(document.querySelectorAll('.maintab'), function(x){ x.className='maintab'; });
     el.className='maintab on';
-    ['a','e','c'].forEach(function(s){
+    ['a','e','c','d'].forEach(function(s){
       document.getElementById('panel_'+s).style.display = (s===tool) ? '' : 'none';
     });
   };
@@ -1400,20 +1951,20 @@ Array.prototype.forEach.call(document.querySelectorAll('.maintab'), function(el)
 
 /* ── متابعة اكتمال رفع الملفات الثلاثة وإظهار زر "تحميل الكل" ── */
 function checkAllDone(){
-  var done = ['a','e','c'].every(function(s){
+  var done = ['a','e','c','d'].every(function(s){
     var res = document.getElementById('res_'+s);
     return res && !res.className.match(/\bhide\b/);
   });
   document.getElementById('dlAllWrap').style.display = done ? 'block' : 'none';
 }
 var _obs = new MutationObserver(checkAllDone);
-['a','e','c'].forEach(function(s){
+['a','e','c','d'].forEach(function(s){
   var res = document.getElementById('res_'+s);
   if(res) _obs.observe(res, {attributes:true, attributeFilter:['class']});
 });
 
 document.getElementById('dlAllBtn').onclick = function(){
-  ['dl_a','dl_e','dl_c'].forEach(function(id, i){
+  ['dl_a','dl_e','dl_c','dl_d'].forEach(function(id, i){
     setTimeout(function(){
       var btn = document.getElementById(id);
       if(btn) btn.click();
