@@ -13,6 +13,7 @@ body{font-family:"Segoe UI",Tahoma,sans-serif;background:#eef4f7;margin:0;paddin
 .maintab.on{background:#16a4bf;color:#fff;border-color:#16a4bf}
 #dlAllWrap{display:none;text-align:center;margin-bottom:20px}
 #dlAllBtn{background:#0d2f40;color:#fff;border:0;border-radius:12px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer}
+#pushAllBtn{background:#0b6b7e;color:#fff;border:0;border-radius:12px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;margin-inline-start:10px}
 .hero{padding:16px 20px !important}
 .hero h1{margin:0}
 
@@ -170,6 +171,8 @@ h2{font-size:15px;font-weight:800;margin-bottom:4px}
 .gaspush-status .err{display:inline-block}
 
 #drop_d .s{font-size:12.5px;color:#5b7684;margin-top:5px}
+
+.impcell{background:#fce4e4 !important;font-weight:800;color:#8a1c2b}
 </style>
 </head>
 <body>
@@ -179,6 +182,7 @@ h2{font-size:15px;font-weight:800;margin-bottom:4px}
   </div>
   <div id="dlAllWrap">
     <button id="dlAllBtn">⬇ تحميل كل الملفات الأربعة</button>
+    <button id="pushAllBtn">☁️ رفع كل الملفات الأربعة لجوجل شيت</button>
   </div>
 <div class="toolpanel" id="panel_a" style="">
 <div class="wrap">
@@ -429,7 +433,7 @@ function gasVerifyCounts(url, expectedCounts, attemptsLeft){
 
 function gasTablesToSheetsPayload(tables){
   return tables.map(function(t){
-    return {
+    var out = {
       name: t.name,
       headers: t.cols,
       rows: t.rows.map(function(r){
@@ -441,6 +445,8 @@ function gasTablesToSheetsPayload(tables){
         });
       })
     };
+    if (t.importantCols && t.importantCols.length) out.highlightCols = t.importantCols;
+    return out;
   });
 }
 
@@ -584,6 +590,66 @@ function makeSheet(rows,cols,pctCols){
    النتائج مع قسم "الملخص" الجاهز في كل شيت). ══ */
 var REGIONS=['جدة','الطائف','المدينة','مكة'];
 
+/* ══ استخراج قسم "الملخص" الجاهز آخر كل شيت شركة (إجمالي التعاقد/المخصص/
+   المورد + نسب الإنجاز + نسب توقيع المستندات) — بالتوصيل ومن غيره.
+   بالبحث عن التسميات (labels) لأن ترتيب أعمدة "بالتوصيل"/"التوصيل" (F/G/H)
+   بيختلف شوية بين شركة وأخرى، وبعض الشركات (زي شركة اقوى للمقاولات) مالهاش
+   أعمدة "بالتوصيل" خالص. ══ */
+var SUMMARY_LABELS=[
+  ['إجمالي التعاقد','إجمالي_التعاقد'],
+  ['إجمالي المخصص','إجمالي_المخصص'],
+  ['إجمالي المورد','إجمالي_المورد'],
+  ['نسبة الإنجاز (المورد / التعاقد)','نسبة_الإنجاز_المورد_التعاقد'],
+  ['نسبة الإنجاز (المورد / المخصص)','نسبة_الإنجاز_المورد_المخصص'],
+  ['نسبة الإنجاز الكميات (المورد / المخصص)','نسبة_الإنجاز_الكميات_المورد_المخصص'],
+  ['نسبة مشاهد الإنجاز الموقعة','نسبة_مشاهد_الإنجاز_الموقعة'],
+  ['نسبة نموذج 3 الموقع','نسبة_نموذج_3_الموقع'],
+  ['نسبة تقرير التوريد الموقع','نسبة_تقرير_التوريد_الموقع'],
+  ['نسبة MIR الموقع','نسبة_MIR_الموقع']
+];
+/* أول 6 تسميات بس هي اللي ليها نسخة "بالتوصيل" فعلاً في الملف الخام —
+   الباقي نسب توقيع مستندات مالهاش علاقة بالتوصيل أصلاً. */
+var HAS_DELIVERY_VARIANT={
+  'إجمالي_التعاقد':true,'إجمالي_المخصص':true,'إجمالي_المورد':true,
+  'نسبة_الإنجاز_المورد_التعاقد':true,'نسبة_الإنجاز_المورد_المخصص':true,
+  'نسبة_الإنجاز_الكميات_المورد_المخصص':true
+};
+
+function parseDeliverySummary(G){
+  var titleRow=-1;
+  for(var i=0;i<G.R;i++){ if(str(G.g[i]?G.g[i][0]:null)==='الملخص'){ titleRow=i; break; } }
+  if(titleRow<0) return null;
+
+  var header=G.g[titleRow]||[];
+  var colDelivery=-1, colDeliveryOnly=-1;
+  for(var c=1;c<header.length;c++){
+    var h=str(header[c]);
+    if(h==='الإجمالي بالتوصيل') colDelivery=c;
+    if(h==='التوصيل') colDeliveryOnly=c;
+  }
+
+  function findLabelRow(label){
+    for(var i=titleRow+1;i<Math.min(G.R,titleRow+20);i++){
+      if(str(G.g[i]?G.g[i][0]:null)===label) return i;
+    }
+    return -1;
+  }
+
+  var out={};
+  SUMMARY_LABELS.forEach(function(pair){
+    var label=pair[0], key=pair[1];
+    var r=findLabelRow(label);
+    out[key]= r>-1 ? num(G.g[r][3]) : null; /* العمود D = index 3 (القيمة الأساسية/من غير توصيل) */
+    if(HAS_DELIVERY_VARIANT[key]){
+      out[key+'_بالتوصيل']=(r>-1 && colDelivery>-1)? num(G.g[r][colDelivery]) : null;
+    }
+  });
+  var contractRow=findLabelRow('إجمالي التعاقد');
+  out['التوصيل']=(contractRow>-1 && colDeliveryOnly>-1)? num(G.g[contractRow][colDeliveryOnly]) : null;
+  return out;
+}
+
+
 function parseCompanySheet(G,sheetName){
   if(!G.R||G.C<4) return null;
   var headerRow=-1;
@@ -677,7 +743,8 @@ function parseCompanySheet(G,sheetName){
   return {
     company:company, sheet:sheetName,
     missingAlloc:missingAlloc, missingPrice:missingPrice,
-    distRows:distRows, itemRows:itemRows
+    distRows:distRows, itemRows:itemRows,
+    deliverySummary:parseDeliverySummary(G)
   };
 }
 
@@ -747,14 +814,66 @@ function CLEAN(wb){
     };
   });
 
+
+  /* ── ملخص الإنجاز والتوصيل — منقول بنص حرفي من قسم "الملخص" الجاهز آخر
+     كل شيت شركة (مش محسوب من عندنا)، لأنه فيه مقاييس (مشاهد الإنجاز
+     الموقعة / نموذج 3 / تقرير التوريد / MIR) مالهاش علاقة بكميات الأصناف
+     خالص — مجرد نسب توقيع مستندات متسجلة يدويًا في الملف الخام. ── */
+  var DELIVERY_SUMMARY_COLS=['الشركة',
+    'إجمالي_التعاقد','إجمالي_التعاقد_بالتوصيل','التوصيل',
+    'إجمالي_المخصص','إجمالي_المخصص_بالتوصيل',
+    'إجمالي_المورد','إجمالي_المورد_بالتوصيل',
+    'نسبة_الإنجاز_المورد_التعاقد','نسبة_الإنجاز_المورد_التعاقد_بالتوصيل',
+    'نسبة_الإنجاز_المورد_المخصص','نسبة_الإنجاز_المورد_المخصص_بالتوصيل',
+    'نسبة_الإنجاز_الكميات_المورد_المخصص','نسبة_الإنجاز_الكميات_المورد_المخصص_بالتوصيل',
+    'نسبة_مشاهد_الإنجاز_الموقعة','نسبة_نموذج_3_الموقع',
+    'نسبة_تقرير_التوريد_الموقع','نسبة_MIR_الموقع'];
+  /* الأربع خلايا الأهم (حسب طلبك بالظبط): إجمالي التعاقد بالتوصيل،
+     نسبة الإنجاز (المورد/التعاقد) بالتوصيل، نسبة الإنجاز (المورد/المخصص)
+     من غير توصيل، نسبة مشاهد الإنجاز الموقعة. */
+  var DELIVERY_IMPORTANT_COLS=['إجمالي_التعاقد_بالتوصيل',
+    'نسبة_الإنجاز_المورد_التعاقد_بالتوصيل','نسبة_الإنجاز_المورد_المخصص',
+    'نسبة_مشاهد_الإنجاز_الموقعة'];
+  var deliverySummaryRows=companies.map(function(c){
+    var d=c.deliverySummary||{};
+    var row={'الشركة':c.company};
+    DELIVERY_SUMMARY_COLS.forEach(function(k){ if(k!=='الشركة') row[k]=(k in d)?d[k]:null; });
+    return row;
+  });
+  (function(){
+    function sumOrNull(key){
+      var vals=deliverySummaryRows.map(function(r){return r[key];}).filter(function(v){return v!==null&&v!==undefined;});
+      return vals.length? vals.reduce(function(a,v){return a+v;},0) : null;
+    }
+    var tContract=sumOrNull('إجمالي_التعاقد'), tContractDlv=sumOrNull('إجمالي_التعاقد_بالتوصيل'), tDlvOnly=sumOrNull('التوصيل');
+    var tAlloc=sumOrNull('إجمالي_المخصص'), tAllocDlv=sumOrNull('إجمالي_المخصص_بالتوصيل');
+    var tSupply=sumOrNull('إجمالي_المورد'), tSupplyDlv=sumOrNull('إجمالي_المورد_بالتوصيل');
+    var totalRow={
+      'الشركة':'الإجمالي',
+      'إجمالي_التعاقد':tContract,'إجمالي_التعاقد_بالتوصيل':tContractDlv,'التوصيل':tDlvOnly,
+      'إجمالي_المخصص':tAlloc,'إجمالي_المخصص_بالتوصيل':tAllocDlv,
+      'إجمالي_المورد':tSupply,'إجمالي_المورد_بالتوصيل':tSupplyDlv,
+      'نسبة_الإنجاز_المورد_التعاقد':(tSupply!==null&&tContract)?Math.round(tSupply/tContract*10000)/10000:null,
+      'نسبة_الإنجاز_المورد_التعاقد_بالتوصيل':(tSupplyDlv!==null&&tContractDlv)?Math.round(tSupplyDlv/tContractDlv*10000)/10000:null,
+      'نسبة_الإنجاز_المورد_المخصص':(tSupply!==null&&tAlloc)?Math.round(tSupply/tAlloc*10000)/10000:null,
+      'نسبة_الإنجاز_المورد_المخصص_بالتوصيل':(tSupplyDlv!==null&&tAllocDlv)?Math.round(tSupplyDlv/tAllocDlv*10000)/10000:null,
+      'نسبة_الإنجاز_الكميات_المورد_المخصص':null,'نسبة_الإنجاز_الكميات_المورد_المخصص_بالتوصيل':null,
+      'نسبة_مشاهد_الإنجاز_الموقعة':null,'نسبة_نموذج_3_الموقع':null,
+      'نسبة_تقرير_التوريد_الموقع':null,'نسبة_MIR_الموقع':null
+    };
+    deliverySummaryRows.push(totalRow);
+  })();
+
   var T=[];
+  T.push({name:'ملخص_الإنجاز_والتوصيل',rows:deliverySummaryRows,cols:DELIVERY_SUMMARY_COLS,
+    pctCols:['نسبة_الإنجاز_المورد_التعاقد','نسبة_الإنجاز_المورد_التعاقد_بالتوصيل',
+      'نسبة_الإنجاز_المورد_المخصص','نسبة_الإنجاز_المورد_المخصص_بالتوصيل',
+      'نسبة_الإنجاز_الكميات_المورد_المخصص','نسبة_الإنجاز_الكميات_المورد_المخصص_بالتوصيل',
+      'نسبة_مشاهد_الإنجاز_الموقعة','نسبة_نموذج_3_الموقع','نسبة_تقرير_التوريد_الموقع','نسبة_MIR_الموقع'],
+    importantCols:DELIVERY_IMPORTANT_COLS});
   T.push({name:'التوزيع_التفصيلي',rows:distRows,
     cols:['الشركة','المنطقة','الصنف','سعر_الوحدة','الكمية_المخصصة','الكمية_الموردة','المتبقي','نسبة_الإنجاز','ملاحظة'],
     pctCols:['نسبة_الإنجاز']});
-  T.push({name:'دليل_الأصناف',rows:itemRows,
-    cols:['الشركة','الصنف','سعر_الوحدة','الكمية_الإجمالية_للبند','الكمية_المخصصة_للبند',
-      'الكمية_الموردة_الإجمالية','المتبقي','نسبة_إنجاز_البند','الكمية_للمدرسة'],
-    pctCols:['نسبة_إنجاز_البند']});
   T.push({name:'ملخص_حسب_الشركة',rows:companySummary,
     cols:['الشركة','عدد_الأصناف','إجمالي_قيمة_التعاقد','إجمالي_القيمة_المخصصة','إجمالي_القيمة_الموردة',
       'نسبة_الإنجاز_المالي','إجمالي_الكمية_المخصصة','إجمالي_الكمية_الموردة','نسبة_الإنجاز_بالكمية'],
@@ -769,7 +888,10 @@ function CLEAN(wb){
     {'الملاحظة':'عدد شيتات الشركات اللي اتقرت من هذا الملف: '+companies.length+' — '+companies.map(function(c){return c.company;}).join('، '),'القيمة':null},
     {'الملاحظة':'أي شيت في الملف عموده الأول مفيهوش صف "المنطقة" اتجاهل تلقائيًا (زي شيتات تجميعية غير متعلقة بهذه المبادرة، إن وُجدت).','القيمة':null},
     {'الملاحظة':'عمود "الكمية_المخصصة" في شيت التوزيع = توزيع "الكمية المخصصة للبند" على المناطق (القيمة المتاحة فعليًا في الملف الخام لكل منطقة) — مش "الكمية الإجمالية المتعاقد عليها" (دي أكبر عادة وبتشمل هامش/مخزون إضافي، ومفيهاش توزيع منطقي موثوق في الملف).','القيمة':null},
-    {'الملاحظة':'قسم "الملخص" الجاهز آخر كل شيت شركة في الملف الخام اتقورأش نهائيًا هنا — ترتيب أعمدته مش ثابت بين الشركات. كل أرقام "ملخص_حسب_الشركة" هنا محسوبة مباشرة من سعر الوحدة × الكمية لكل صنف، والنتيجة اتطابقت مع أرقام قسم الملخص الأصلي بالكامل وقت التحقق.','القيمة':null}
+    {'الملاحظة':'قسم "الملخص" الجاهز آخر كل شيت شركة موجود دلوقتي بنص حرفي في شيت "ملخص_الإنجاز_والتوصيل" (بالتوصيل / من غير توصيل / التوصيل لوحده لكل شركة + صف إجمالي). أرقام "ملخص_حسب_الشركة" هنا (المالية بالريال) لسه محسوبة مستقلة من سعر الوحدة × الكمية لكل صنف — مش من قسم الملخص — والنتيجتين اتطابقتا بالكامل وقت التحقق.','القيمة':null},
+    {'الملاحظة':'الأعمدة الأربعة الأهم في شيت "ملخص_الإنجاز_والتوصيل" (زي ما طلبت بالظبط): إجمالي_التعاقد_بالتوصيل، نسبة_الإنجاز_المورد_التعاقد_بالتوصيل، نسبة_الإنجاز_المورد_المخصص، نسبة_مشاهد_الإنجاز_الموقعة — دي بتتظلل تلقائيًا باللون الأحمر في جوجل شيت بعد كل رفع، وبتظهر متميزة في معاينة الأداة هنا كمان.','القيمة':null},
+    {'الملاحظة':'شركة "اقوى للمقاولات" مالهاش أعمدة "بالتوصيل"/"التوصيل" خالص في شيتها بالملف الخام (لسه معندهاش أي توريد فعلي مسجل) — فخانات الـ"بالتوصيل" ليها فاضية عن قصد في شيت ملخص_الإنجاز_والتوصيل، مش خطأ.','القيمة':null},
+    {'الملاحظة':'شيت "دليل_الأصناف" اتشال من مخرجات هذا الملف بناءً على طلبك.','القيمة':null}
   ];
   if(missingAllocCos.length) docRows.push({'الملاحظة':'شركات مالهاش صف "الكمية المخصصة للبند" في شيتها (استُخدمت الكمية الإجمالية المتعاقد عليها كأفضل تقدير متاح لحساب نسبة الإنجاز بالكمية فقط، مش للقيم المالية): '+missingAllocCos.join('، '),'القيمة':null});
   if(missingPriceCos.length) docRows.push({'الملاحظة':'شركات مالهاش صف "سعر البند الافرادى" في شيتها (فمفيش لها قيم مالية بالريال خالص — الكميات فقط متاحة): '+missingPriceCos.join('، '),'القيمة':null});
@@ -856,9 +978,10 @@ function fmtCell(v){
 }
 function preview(i){
   var t=TABLES[i];
-  var h='<thead><tr>'+t.cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>';
+  var imp=t.importantCols||[];
+  var h='<thead><tr>'+t.cols.map(function(c){return '<th'+(imp.indexOf(c)>=0?' class="impcell"':'')+'>'+c+'</th>';}).join('')+'</tr></thead><tbody>';
   t.rows.slice(0,12).forEach(function(r){
-    h+='<tr>'+t.cols.map(function(c){return '<td>'+fmtCell(r[c])+'</td>';}).join('')+'</tr>';
+    h+='<tr>'+t.cols.map(function(c){return '<td'+(imp.indexOf(c)>=0?' class="impcell"':'')+'>'+fmtCell(r[c])+'</td>';}).join('')+'</tr>';
   });
   $('tbl').innerHTML=h+'</tbody>';
 }
@@ -866,8 +989,8 @@ function preview(i){
 $('dl').onclick=function(){ if(WBOUT) XLSX.writeFile(WBOUT,OUTNAME,{compression:true}); };
 
 gasSetupPush('a', function(){ return TABLES; }, {
+  'ملخص_الإنجاز_والتوصيل':'deliverySummary',
   'التوزيع_التفصيلي':'distribution',
-  'دليل_الأصناف':'itemsGuide',
   'ملخص_حسب_الشركة':'byCompany',
   'ملخص_حسب_المنطقة':'byRegion'
 });
@@ -1178,18 +1301,11 @@ function CLEAN(wb){
   });
 
   var T=[];
-  if(schools.length) T.push({name:'دليل_المدارس',rows:schools,
-    cols:['المنطقة','إدارة_التعليم','المكتب_الإقليمي','اسم_المدرسة','الرقم_الوزاري',
-      'المرحلة_التعليمية','مدير_المدرسة','رقم_الجوال','الموقع','نوع_الجهة']});
   T.push({name:'التوزيع_حسب_المنطقة_والصنف',rows:regionItemRows,
     cols:['المورد','رقم_أمر_العمل','المنطقة','الصنف','الكمية_المطلوبة','الكمية_الموردة',
       'المتبقي','نسبة_الإنجاز','الشيت_المصدر','ملاحظة'],pctCols:['نسبة_الإنجاز']});
   if(pendingRows.length) T.push({name:'بنود_قيد_اعتماد_امر_العمل',rows:pendingRows,
     cols:['الصنف','الكمية_الإجمالية','عدد_المدارس_المشمولة','ملاحظة']});
-  T.push({name:'دليل_الأصناف',rows:itemRows,
-    cols:['المورد','رقم_أمر_العمل','الصنف','الكمية_الإجمالية_للبند','الكمية_المخصصة_للبند',
-      'سعر_البند_الإفرادي','الكمية_للمدرسة','نسبة_إنجاز_البند','الكمية_الموحدة_لكل_مدرسة',
-      'عدد_المدارس_المشمولة'],pctCols:['نسبة_إنجاز_البند']});
   var kc={}; kpiRows.forEach(function(r){Object.keys(r).forEach(function(k){
     if(['المورد','رقم_أمر_العمل','الشيت_المصدر','ملاحظة'].indexOf(k)<0) kc[k]=1;});});
   var kcols=['المورد','رقم_أمر_العمل','الشيت_المصدر'].concat(Object.keys(kc).sort()).concat(['ملاحظة']);
@@ -1316,7 +1432,6 @@ $('dl').onclick=function(){ if(WBOUT) XLSX.writeFile(WBOUT,OUTNAME,{compression:
 gasSetupPush('e', function(){ return TABLES; }, {
   'التوزيع_حسب_المنطقة_والصنف':'distribution',
   'بنود_قيد_اعتماد_امر_العمل':'pendingItems',
-  'دليل_الأصناف':'itemsGuide',
   'مؤشرات_الموردين':'supplierKpi',
   'ملخص_حسب_المنطقة':'byRegion',
   'ملخص_حسب_المورد':'bySupplier'
@@ -1969,6 +2084,15 @@ document.getElementById('dlAllBtn').onclick = function(){
       var btn = document.getElementById(id);
       if(btn) btn.click();
     }, i*400);
+  });
+};
+
+document.getElementById('pushAllBtn').onclick = function(){
+  ['push_a','push_e','push_c','push_d'].forEach(function(id, i){
+    setTimeout(function(){
+      var btn = document.getElementById(id);
+      if(btn) btn.click();
+    }, i*800);
   });
 };
 </script>
