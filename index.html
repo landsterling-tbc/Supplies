@@ -1014,6 +1014,23 @@ function num(v){
   if(s===''||s==='-'||s==='.') return null;
   var n=parseFloat(s); return isNaN(n)?null:n;
 }
+/* أول قيمة رقمية حقيقية في صف — مستخدمة لقراءة قسم "الملخص" (KPIs) بدل
+   الاعتماد على عمود ثابت (fic)، لأن خلية التسمية في هذا القسم بتكون
+   مدموجة (merge) على كذا عمود (مثلاً A:C)، فـ sheetGrid بينسخ نص التسمية
+   نفسه في كل أعمدة الدمج — لو استخدمنا عمود ثابت زي fic (اللي أصلاً
+   محسوب لغرض تاني خالص وهو أول عمود صنف، وممكن يقع بالظبط جوه منطقة
+   الدمج لما يكون فيه عمود رول-اب زائد) كنا هنقرأ نص التسمية المكرر
+   نفسه بدل الرقم الحقيقي، وده كان بيرجع null، أو حتى رقم عشوائي لو
+   التسمية فيها رقم زي "نسبة نموذج 3 الموقع" (num() كانت بتستخرج الـ"3"
+   من النص!). القيمة الحقيقية دايمًا أول خلية رقم فعلي (typeof==='number')
+   بتقابلنا في الصف — وده اللي كان بيسبب اختفاء/غلط كل أرقام "الملخص"
+   (إجمالي التعاقد/المخصص/المورد ونسب الإنجاز) في شيت "مؤشرات_الموردين"
+   لأي شيت فيه عمود رول-اب زائد. */
+function firstNumInRow(row){
+  if(!row) return null;
+  for(var i=1;i<row.length;i++){ if(typeof row[i]==='number') return row[i]; }
+  return null;
+}
 function uniquify(names){
   var seen={},out=[];
   names.forEach(function(n){
@@ -1117,7 +1134,8 @@ function parseAllSuppliers(G){
 
 /* ══ 2) الشيتات التجميعية (السبعة) -> مناطق × أصناف حقيقية + دليل أصناف + مؤشرات ══ */
 var META_LABELS={'الكمية الاجمالية للبند':'الكمية_الإجمالية_للبند','الكمية المخصصة للبند':'الكمية_المخصصة_للبند',
-  'سعر البند الافرادى':'سعر_البند_الإفرادي','الكمية للمدرسة او المجمع':'الكمية_للمدرسة',
+  'سعر البند الافرادى':'سعر_البند_الإفرادي','سعر البند الانفرادى':'سعر_البند_الإفرادي',
+  'الكمية للمدرسة او المجمع':'الكمية_للمدرسة',
   'نسبة الانجاز(%)':'نسبة_إنجاز_البند'};
 var SKIP={'المنطقة':1,'الملخص':1,'الكميات المطلوبة':1,'الكميات الموردة':1};
 
@@ -1150,12 +1168,67 @@ function parseAgg(G,name){
     if(a==='الملخص'){ sumRow=r2; break; }
   }
 
+  /* ★ كشف عمود "إجمالي/رول-اب" زائد جوّه منطقة الأصناف: بعض شيتات هذا النوع
+     فيها عمود إضافي أول عمود صنف (زي "المخصص الإجمالي" أو "الكميات
+     المخصصة") قيمته في كل صف = مجموع كل أعمدة الأصناف الحقيقية الجايه
+     بعده في نفس الصف — لو سيبناه هيتحسب كأنه "صنف" مستقل قائم بذاته
+     ويضاعف كل إجماليات الشيت (التوزيع + ملخص المنطقة + ملخص المورد).
+     الكشف هنا حسب القيمة الفعلية (مجموع باقي الأعمدة = العمود الأول في
+     كل صفوف "المطلوب/المخصص") مش حسب اسم العمود، عشان يشتغل حتى لو
+     الاسم اتغيّر في ملفات تانية — بنفس فلسفة الكشف من البيانات المستخدمة
+     في باقي الكود (زي rawGrid وparseDeliverySummary). ══ */
+  var rollupExcluded=null;
+  if(itemCols.length>2){
+    var dlvBound=dlvRow>=0?dlvRow:sumRow;
+    var checkRows=[];
+    for(var rc=hrow+1;rc<dlvBound;rc++){
+      var lbl=str(G.g[rc]?G.g[rc][0]:null);
+      if(!lbl||META_LABELS[lbl]||SKIP[lbl]) continue;
+      checkRows.push(rc);
+    }
+    if(checkRows.length>=2){
+      var validated=0, matched=0;
+      checkRows.forEach(function(rc){
+        var first=num(G.g[rc][itemCols[0]]);
+        if(first===null) return;
+        var rest=0,hasAny=false;
+        for(var ii=1;ii<itemCols.length;ii++){
+          var v=num(G.g[rc][itemCols[ii]]);
+          if(v!==null){ rest+=v; hasAny=true; }
+        }
+        // صف مفيهوش أي تفصيل بنود على الإطلاق (زي صف "الكمية الاجمالية" الكلي
+        // اللي بيدّي رقم واحد بس من غير توزيع على الأصناف) — بنتجاهله، مش دليل
+        // ضد التطابق، لأنه أصلاً مالوش بيانات كافية نقارنها.
+        if(!hasAny) return;
+        validated++;
+        if(Math.abs(rest-first)<0.5) matched++;
+      });
+      if(validated>=2 && matched===validated){
+        rollupExcluded=itemNames[0];
+        itemCols=itemCols.slice(1); itemNames=itemNames.slice(1);
+      }
+    }
+  }
+
   var meta={},regions={},kpis={};
+  var regionSuffixStripped={}, priceLabelVariant=null, extraSubtableFound={};
+  /* بعض الشيتات فيها جدول فرعي تاني تمامًا آخر شيت "الملخص" (بعنوان
+     "المجموعة الأولى"/"المجموعة الثانية"/... وصف إجمالي "المجموع")
+     بيوضح كميات مخصصة/موردة حسب مجموعات فرعية (أحيانًا حسب منطقة،
+     وأحيانًا بدون أي تمييز واضح بين المجموعات) — مش نفس بنية قسم
+     "الملخص" العادي (قيمة واحدة لكل صف)، فلازم نستثنيه هنا صراحة عشان
+     ميتسربش كـ"مؤشر" وهمي بقيمة من عمود غلط (كان بيحصل قبل كده). */
   for(var r3=hrow+1;r3<G.R;r3++){
     var label=str(G.g[r3]?G.g[r3][0]:null);
     if(!label) continue;
-    if(r3>=sumRow){ if(label!=='الملخص') kpis[label]=num(G.g[r3][fic]); continue; }
+    if(r3>=sumRow){
+      if(label==='الملخص') continue;
+      if(label.indexOf('المجموعة')===0||label==='المجموع'){ extraSubtableFound[label]=1; continue; }
+      kpis[label]=firstNumInRow(G.g[r3]);
+      continue;
+    }
     if(META_LABELS[label]){
+      if(label!=='سعر البند الافرادى'&&META_LABELS[label]==='سعر_البند_الإفرادي') priceLabelVariant=label;
       itemCols.forEach(function(c,i){
         if(!itemNames[i]) return;
         (meta[itemNames[i]]=meta[itemNames[i]]||{})[META_LABELS[label]]=num(G.g[r3][c]);
@@ -1164,10 +1237,22 @@ function parseAgg(G,name){
     }
     if(SKIP[label]||label.indexOf('اجمالى الكميات الموردة')===0) continue;
     var block=(dlvRow>=0&&r3>dlvRow)?'dlv':'req';
+    /* ★ بعض الشيتات بتكتب اسم المنطقة في قسم "الكميات المطلوبة" بصيغة فيها
+       لاحقة توضيحية زي "جدة (كميات)" أو "جدة (الكميات)"، بينما في قسم
+       "الكميات الموردة" بتكتب نفس المنطقة عارية من غير أي لاحقة "جدة" —
+       لو استخدمنا النص الخام زي ما هو كمفتاح تجميع، الصفين هيتعاملوا كأنهم
+       منطقتين مختلفتين تمامًا، فتظهر الكمية المطلوبة في صف والكمية
+       الموردة في صف تاني منفصل تحت اسم منطقة مشوّه (فيه "(كميات)" جوه
+       اسم المنطقة)، وميحصلش دمج بينهم ولا يتحسب نسبة إنجاز ولا فرق —
+       وده كان بالظبط سبب اختفاء/عدم ظهور الكميات المتوردة بشكل مفيد في
+       التحليل. الحل: نشيل أي لاحقة بين قوسين آخر اسم المنطقة قبل ما نستخدمه
+       كمفتاح، عشان "جدة (كميات)" و"جدة" يتجمّعوا في نفس صف المنطقة. */
+    var regionLabel=label.replace(/\s*\([^)]*\)\s*$/,'').trim();
+    if(regionLabel!==label) regionSuffixStripped[label]=1;
     itemCols.forEach(function(c,i){
       if(!itemNames[i]) return;
       var v=num(G.g[r3][c]); if(v===null) return;
-      var k=label+'||'+itemNames[i];
+      var k=regionLabel+'||'+itemNames[i];
       (regions[k]=regions[k]||{})[block]=v;
     });
   }
@@ -1188,7 +1273,9 @@ function parseAgg(G,name){
   });
   var kr={'المورد':supplier,'رقم_أمر_العمل':orderNo,'الشيت_المصدر':name};
   Object.keys(kpis).forEach(function(k){kr[k]=kpis[k];});
-  return {supplier:supplier,orderNo:orderNo,sheet:name,regions:out,items:items,kpi:kr};
+  return {supplier:supplier,orderNo:orderNo,sheet:name,regions:out,items:items,kpi:kr,rollupExcluded:rollupExcluded,
+    regionSuffixStripped:Object.keys(regionSuffixStripped),priceLabelVariant:priceLabelVariant,
+    extraSubtableFound:Object.keys(extraSubtableFound)};
 }
 
 /* ══ التنظيف الكامل ══ */
@@ -1326,6 +1413,27 @@ function CLEAN(wb){
   docRows.push({'الملاحظة':'الشيتات التجميعية فيها فعلاً بيانات "مطلوب" و"موردة" حقيقية ومختلفة عن بعض حسب المنطقة — هذه اعتُمدت كما هي في شيت التوزيع.','القيمة':null});
   docRows.push({'الملاحظة':'رقم أمر العمل (TBC...) تم استخراجه من عنوان كل شيت تجميعي عند وجوده فقط (بعض الشيتات مفيهاش رقم أمر عمل أصلاً في العنوان).','القيمة':null});
   docRows.push({'الملاحظة':'توحيد أسماء المناطق: مكة/مكة المكرمة → مكة المكرمة، المدينة/المدينة المنورة → المدينة المنورة.','القيمة':null});
+  var rollupNotes=aggResults.filter(function(a){return a.rollupExcluded;})
+    .map(function(a){return a.sheet+' (عمود "'+a.rollupExcluded+'")';});
+  if(rollupNotes.length){
+    docRows.push({'الملاحظة':'تم استبعاد عمود إجمالي/رول-اب زائد كان موجود جوّه منطقة الأصناف في هذه الشيتات (قيمته = مجموع باقي أعمدة الأصناف في نفس الصف، فكان هيتحسب غلط كـ"صنف" مستقل ويضاعف كل الإجماليات لو سبناه): '+rollupNotes.join('، ')+'.','القيمة':null});
+  }
+  var regionSuffixNotes=aggResults.filter(function(a){return a.regionSuffixStripped&&a.regionSuffixStripped.length;})
+    .map(function(a){return a.sheet+' ('+a.regionSuffixStripped.join('، ')+')';});
+  if(regionSuffixNotes.length){
+    docRows.push({'الملاحظة':'في هذه الشيتات، اسم المنطقة في قسم "الكميات المطلوبة" كان مكتوب بلاحقة زي "(كميات)"/"(الكميات)" بينما في قسم "الكميات الموردة" نفس المنطقة مكتوبة عارية بدون اللاحقة — لو سبناها كده كانت هتتحسب كمنطقتين مختلفتين تمامًا فتختفي الكمية الموردة من صف المنطقة الصحيح. تم توحيد الاسمين (حذف اللاحقة) عشان الكمية المطلوبة والموردة يتجمعوا في نفس صف المنطقة الحقيقي: '+regionSuffixNotes.join('، ')+'.','القيمة':null});
+  }
+  var priceVariantNotes=aggResults.filter(function(a){return a.priceLabelVariant;})
+    .map(function(a){return a.sheet+' ("'+a.priceLabelVariant+'")';});
+  if(priceVariantNotes.length){
+    docRows.push({'الملاحظة':'في هذه الشيتات صف "سعر الوحدة" كان مكتوب باسم مختلف شوية عن باقي الشيتات ("سعر البند الانفرادى" بدل "سعر البند الافرادى") — لولا التوحيد كان هيتحسب غلط كصف "منطقة" مستقل (فيتسرب السعر لكل صنف كأنه كمية مطلوبة وهمية). تم التعرف عليه وربطه بنفس عمود السعر الصحيح: '+priceVariantNotes.join('، ')+'.','القيمة':null});
+  }
+  docRows.push({'الملاحظة':'أرقام قسم "الملخص" (إجمالي التعاقد/المخصص/المورد ونسب الإنجاز) بقت بتُقرأ من أول خلية فيها رقم فعلي في نفس الصف، مش من عمود ثابت — لأن خلية اسم المؤشر في هذا القسم مدموجة (merge) على أكتر من عمود، وكان ده بيسبب قراءة نص الاسم نفسه بدل الرقم الحقيقي (وأحيانًا رقم عشوائي لو الاسم فيه رقم زي "نموذج 3") في أي شيت فيه عمود رول-اب زائد قبل الأصناف — وهو السبب في اختفاء/غلط كل أرقام "مؤشرات_الموردين" لهذه الشيتات قبل الإصلاح.','القيمة':null});
+  var extraSubtableNotes=aggResults.filter(function(a){return a.extraSubtableFound&&a.extraSubtableFound.length;})
+    .map(function(a){return a.sheet;});
+  if(extraSubtableNotes.length){
+    docRows.push({'الملاحظة':'⚠️ في هذه الشيتات فيه جدول فرعي إضافي آخر قسم "الملخص" (بعنوان "المجموعة الأولى" ونحوها، وصف "المجموع") فيه كميات مخصصة/موردة مقسّمة على مجموعات فرعية (أحيانًا حسب المنطقة، وأحيانًا من غير أي تسمية توضح المجموعات دي إيه بالظبط). تم استبعاد هذا الجدول من كل الحسابات عشان ميتسربش كرقم غلط زي ما كان بيحصل قبل كده، لكنه لسه مش متضمن كبيانات في أي شيت مخرج — محتاج نعرف من حضرتك المجموعات دي بتمثل إيه (دفعات توريد؟ مراحل؟) عشان نظبطها صح: '+extraSubtableNotes.join('، ')+'.','القيمة':null});
+  }
   if(schools.length){
     docRows.push({'الملاحظة':'إجمالي عدد المدارس الحقيقية (برقم وزاري) في شيت "كل الموردين"','القيمة':nSchoolsReal});
     docRows.push({'الملاحظة':'عدد الجهات المذكورة في نفس عمود "اسم المدرسة" لكنها ليست مدرسة (استاد/مجمع رياضي/إدارة تعليم)','القيمة':nOther});
